@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import Auth from './components/Auth'
+import WinsForm from './components/WinsForm'
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -29,11 +30,7 @@ function App() {
 
   if (!session) return <Auth />
 
-  return (
-    <div className="min-h-screen bg-surface flex items-center justify-center">
-      <p className="text-ink">Logged in as {session.user.email}</p>
-    </div>
-  )
+  return <WinsForm session={session} />
 }
 
 export default App
