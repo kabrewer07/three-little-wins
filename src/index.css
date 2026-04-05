@@ -8,4 +8,10 @@
   --color-primary: #1565a8;
   --color-action: #1a237e;
   --color-ink: #050f1a;
+  --font-serif: 'Lora', serif;
+  --font-sans: 'DM Sans', sans-serif;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
 }

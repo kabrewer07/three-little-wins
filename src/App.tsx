@@ -31,7 +31,7 @@ function App() {
   if (loading) return null
 
   if (!session) return <Auth />
-
+console.log(session.user.user_metadata.full_name)
   const handleSignOut = async () => {
     // Clears the session from Supabase and local storage —
     // onAuthStateChange fires automatically and sets session to null
@@ -41,7 +41,7 @@ function App() {
   return (
     <div className="min-h-screen bg-surface p-4">
       <div className="max-w-[780px] mx-auto">
-  
+
         {/* Top bar */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
@@ -52,32 +52,50 @@ function App() {
             </svg>
             <span className="font-serif text-action font-semibold text-sm">Three Little Wins</span>
           </div>
-          <button
-            onClick={handleSignOut}
-            className="text-xs text-subtle hover:text-primary transition-colors"
-          >
-            Sign out
-          </button>
-        </div>
-  
-        {/* Main grid — form + sidebar */}
-        <div className="flex gap-4 items-start">
-  
-          {/* Left column */}
-          <div className="flex-1 min-w-0 flex flex-col gap-4">
-            <WinsForm session={session} />
-            <p className="text-xs font-bold uppercase tracking-widest text-subtle px-1">
-              Past entries
-            </p>
-            <PastEntries />
+
+          {/* User avatar + sign out */}
+          <div className="flex items-center gap-3">
+            {session.user.user_metadata.avatar_url ? (
+              <img
+                src={session.user.user_metadata.avatar_url}
+                alt="Profile"
+                className="w-8 h-8 rounded-full"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-action flex items-center justify-center text-white text-xs font-bold">
+                {session.user.user_metadata.full_name?.[0].toUpperCase() ?? session.user.email?.[0].toUpperCase()}
+              </div>
+            )}
+            <button
+              onClick={handleSignOut}
+              className="text-xs font-semibold text-primary border border-subtle rounded-full px-3 py-1.5 hover:border-primary hover:text-action transition-colors"
+            >
+              Sign out
+            </button>
           </div>
-  
-          {/* Right column — fixed width sidebar */}
-          <div className="w-[200px] flex-shrink-0">
+        </div>
+
+        {/* Main grid — form + sidebar */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start mb-6">
+
+          {/* Left column */}
+          <div className="w-full sm:flex-1 min-w-0">
+            <WinsForm session={session} />
+          </div>
+
+          {/* Right column */}
+          <div className="hidden sm:block w-full sm:w-[200px] sm:flex-shrink-0">
             <Calendar />
           </div>
-  
+
         </div>
+
+        {/* Past entrie */}
+        <p className="text-xs font-bold uppercase tracking-widest text-subtle px-1 mb-3">
+          Past entries
+        </p>
+        <PastEntries />
+
       </div>
     </div>
   )

@@ -51,7 +51,7 @@ export default function PastEntries() {
       {entries.map(entry => (
         <div key={entry.id} className="bg-white rounded-xl border-l-4 border-subtle p-4 shadow-sm">
           <div className="flex items-baseline justify-between mb-2">
-            <p className="font-semibold text-action text-sm">{formatDate(entry.date)}</p>
+            <p className="font-serif font-semibold text-action text-sm">{formatDate(entry.date)}</p>
             <p className="text-xs text-subtle">{entry.wins.length} {entry.wins.length === 1 ? 'win' : 'wins'}</p>
           </div>
           <div className="flex flex-col gap-1">
