@@ -1,15 +1,45 @@
 import type { Session } from '@supabase/supabase-js'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 interface Props {
   session: Session
 }
 
+const getLocalDate = () => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
 export default function WinsForm({ session }: Props) {
   const [wins, setWins] = useState(['', '', ''])
   const [improvement, setImprovement] = useState('')
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    const fetchToday = async () => {
+      const todayDate = getLocalDate()
+  
+      const { data, error } = await supabase
+        .from('wins')
+        .select('*')
+        .eq('date', todayDate)
+        .single()
+
+        // PGRST116 = no rows found, which is normal for a new user
+        if (error && error.code !== 'PGRST116') {
+          console.error(error)
+        }
+  
+        if (data) {
+          const wins = data.wins.length >= 3 ? data.wins : [...data.wins, '', '', ''].slice(0, 3)
+          setWins(wins)
+          setImprovement(data.improvement ?? '')
+        }
+    }
+  
+    fetchToday()
+  }, [])
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -54,11 +84,13 @@ export default function WinsForm({ session }: Props) {
   
     setSaving(true)
   
-    const { error } = await supabase.from('wins').insert({
+    const { error } = await supabase.from('wins').upsert({
       user_id: session.user.id,
-      date: new Date().toISOString().split('T')[0],
+      date: getLocalDate(),
       wins: filteredWins,
       improvement: improvement.trim() || null
+    }, {
+      onConflict: 'user_id, date'
     })
   
     if (error) {
