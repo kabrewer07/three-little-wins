@@ -69,63 +69,61 @@ export default function WinsForm({ session }: Props) {
   }
     
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm p-8">
-        <h1 className="text-2xl font-bold text-action mb-1">Three Little Wins</h1>
-        <p className="text-sm text-primary mb-6">{today}</p>
-  
-        <p className="text-xs font-bold uppercase tracking-widest text-subtle mb-3">Your wins</p>
-  
-        <div className="flex flex-col gap-3 mb-2">
-          {wins.map((win, index) => (
-            <div key={index} className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                {index + 1}
-              </div>
-              <input
-                type="text"
-                value={win}
-                onChange={e => handleWinChange(index, e.target.value)}
-                placeholder="What went well today?"
-                className="flex-1 bg-input border border-subtle rounded-xl px-4 py-2 text-sm text-ink placeholder:text-subtle outline-none focus:border-primary transition-colors"
-              />
-            </div>
-          ))}
-        </div>
-  
-        <button
-          onClick={handleAddWin}
-          className="text-primary text-sm font-semibold ml-9 mb-6 hover:text-action transition-colors"
-        >
-          + add another win
-        </button>
-  
-        <div className="h-px bg-input mb-6" />
-  
-        <p className="text-xs font-bold uppercase tracking-widest text-subtle mb-3">One thing to improve</p>
-  
-        <div className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold flex-shrink-0">↑</div>
-          <input
-            type="text"
-            value={improvement}
-            onChange={e => setImprovement(e.target.value)}
-            placeholder={`e.g. ${todaysPrompt}`}
-            className="flex-1 bg-input border border-subtle rounded-xl px-4 py-2 text-sm text-ink placeholder:text-subtle outline-none focus:border-primary transition-colors"
-          />
-        </div>
+    <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm p-8">
+      <h1 className="text-2xl font-bold text-action mb-1">Three Little Wins</h1>
+      <p className="text-sm text-primary mb-6">{today}</p>
 
-        <div className="mt-8 flex justify-end">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-action text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {saving ? 'Saving...' : 'Save today\'s wins ✦'}
-          </button>
-        </div>
-  
+      <p className="text-xs font-bold uppercase tracking-widest text-subtle mb-3">Your wins</p>
+
+      <div className="flex flex-col gap-3 mb-2">
+        {wins.map((win, index) => (
+          <div key={index} className="flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              {index + 1}
+            </div>
+            <input
+              type="text"
+              value={win}
+              onChange={e => handleWinChange(index, e.target.value)}
+              placeholder="What went well today?"
+              className="flex-1 bg-input border border-subtle rounded-xl px-4 py-2 text-sm text-ink placeholder:text-subtle outline-none focus:border-primary transition-colors"
+            />
+          </div>
+        ))}
       </div>
+
+      <button
+        onClick={handleAddWin}
+        className="text-primary text-sm font-semibold ml-9 mb-6 hover:text-action transition-colors"
+      >
+        + add another win
+      </button>
+
+      <div className="h-px bg-input mb-6" />
+
+      <p className="text-xs font-bold uppercase tracking-widest text-subtle mb-3">One thing to improve</p>
+
+      <div className="flex items-center gap-3">
+        <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold flex-shrink-0">↑</div>
+        <input
+          type="text"
+          value={improvement}
+          onChange={e => setImprovement(e.target.value)}
+          placeholder={`e.g. ${todaysPrompt}`}
+          className="flex-1 bg-input border border-subtle rounded-xl px-4 py-2 text-sm text-ink placeholder:text-subtle outline-none focus:border-primary transition-colors"
+        />
+      </div>
+
+      <div className="mt-8 flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="bg-action text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+        >
+          {saving ? 'Saving...' : 'Save today\'s wins ✦'}
+        </button>
+      </div>
+
     </div>
   )
 }
