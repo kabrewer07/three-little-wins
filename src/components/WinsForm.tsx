@@ -1,14 +1,10 @@
 import type { Session } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { getLocalDate } from '../lib/utils'
 
 interface Props {
   session: Session
-}
-
-const getLocalDate = () => {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 }
 
 export default function WinsForm({ session }: Props) {
