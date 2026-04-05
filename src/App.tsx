@@ -31,9 +31,23 @@ function App() {
 
   if (!session) return <Auth />
 
+  const handleSignOut = async () => {
+    // Clears the session from Supabase and local storage —
+    // onAuthStateChange fires automatically and sets session to null
+    await supabase.auth.signOut()
+  }
+
   return (
     <div className="min-h-screen bg-surface p-4">
       <div className="max-w-lg mx-auto flex flex-col gap-6">
+        <div className="flex justify-end">
+          <button
+            onClick={handleSignOut}
+            className="text-xs text-subtle hover:text-primary transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
         <WinsForm session={session} />
         <p className="text-xs font-bold uppercase tracking-widest text-subtle px-1">
           Past entries

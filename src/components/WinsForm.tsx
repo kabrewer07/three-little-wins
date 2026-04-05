@@ -19,7 +19,7 @@ export default function WinsForm({ session }: Props) {
   useEffect(() => {
     const fetchToday = async () => {
       const todayDate = getLocalDate()
-  
+
       const { data, error } = await supabase
         .from('wins')
         .select('*')
