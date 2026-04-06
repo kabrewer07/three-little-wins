@@ -1,6 +1,6 @@
 # Three Little Wins
 
-A daily reflection tool for logging wins and one improvement at the end of each day. Built as both a personal habit tracker and a portfolio project.
+A personal daily reflection tool for logging wins and one improvement at the end of each day. The habit is simple — write down three things that went well. Small wins add up.
 
 ## Features
 
