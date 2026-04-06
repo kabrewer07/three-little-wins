@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { getLocalDate } from '../lib/utils'
 
 interface Entry {
   id: string
@@ -28,6 +29,7 @@ export default function PastEntries() {
       const { data, error } = await supabase
         .from('wins')
         .select('*')
+        .neq('date', getLocalDate())
         .order('date', { ascending: false })
   
       if (error) {

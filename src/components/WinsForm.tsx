@@ -11,6 +11,8 @@ export default function WinsForm({ session }: Props) {
   const [wins, setWins] = useState(['', '', ''])
   const [improvement, setImprovement] = useState('')
   const [saving, setSaving] = useState(false)
+  const [isExistingEntry, setIsExistingEntry] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     const fetchToday = async () => {
@@ -31,6 +33,7 @@ export default function WinsForm({ session }: Props) {
           const wins = data.wins.length >= 3 ? data.wins : [...data.wins, '', '', ''].slice(0, 3)
           setWins(wins)
           setImprovement(data.improvement ?? '')
+          setIsExistingEntry(true) // today's entry already exists
         }
     }
   
@@ -91,6 +94,11 @@ export default function WinsForm({ session }: Props) {
   
     if (error) {
       console.error(error)
+    } else {
+      setSaved(true)
+      setIsExistingEntry(true)
+      // Reset "Saved" back to normal after 2 seconds
+      setTimeout(() => setSaved(false), 2000)
     }
   
     setSaving(false)
@@ -160,7 +168,7 @@ export default function WinsForm({ session }: Props) {
           disabled={saving}
           className="bg-action text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
         >
-          {saving ? 'Saving...' : 'Save today\'s wins ✦'}
+          {saving ? 'Saving...' : saved ? 'Saved ✓' : isExistingEntry ? 'Update today\'s wins ✦' : 'Save today\'s wins ✦'}
         </button>
       </div>
     </div>
