@@ -5,9 +5,18 @@ import { getLocalDate } from '../lib/utils'
 
 interface Props {
   session: Session
+  selectedDate: string
+  onSelectedDateChange: (date: string) => void
+  onWinsSaved?: () => void
 }
 
-export default function WinsForm({ session }: Props) {
+export default function WinsForm({
+  session,
+  selectedDate,
+  onSelectedDateChange,
+  onWinsSaved
+}: Props) {
+  const todayDate = getLocalDate()
   const [wins, setWins] = useState(['', '', ''])
   const [improvement, setImprovement] = useState('')
   const [saving, setSaving] = useState(false)
@@ -15,36 +24,47 @@ export default function WinsForm({ session }: Props) {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    const fetchToday = async () => {
-      const todayDate = getLocalDate()
+    const fetchSelectedDateEntry = async () => {
+      setSaved(false)
 
       const { data, error } = await supabase
         .from('wins')
         .select('*')
-        .eq('date', todayDate)
-        .single()
+        .eq('user_id', session.user.id)
+        .eq('date', selectedDate)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
 
-        // PGRST116 = no rows found, which is normal for a new user
-        if (error && error.code !== 'PGRST116') {
-          console.error(error)
-        }
+      if (error) {
+        console.error(error)
+        return
+      }
   
-        if (data) {
-          const wins = data.wins.length >= 3 ? data.wins : [...data.wins, '', '', ''].slice(0, 3)
-          setWins(wins)
-          setImprovement(data.improvement ?? '')
-          setIsExistingEntry(true) // today's entry already exists
-        }
+      if (data) {
+        const wins = data.wins.length >= 3 ? data.wins : [...data.wins, '', '', ''].slice(0, 3)
+        setWins(wins)
+        setImprovement(data.improvement ?? '')
+        setIsExistingEntry(true)
+      } else {
+        // New date selection with no saved entry should start clean.
+        setWins(['', '', ''])
+        setImprovement('')
+        setIsExistingEntry(false)
+      }
     }
   
-    fetchToday()
-  }, [])
+    void fetchSelectedDateEntry()
+  }, [selectedDate, session.user.id])
 
-  const today = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric'
-  })
+  const selectedDateLabel = (() => {
+    const [year, month, day] = selectedDate.split('-').map(Number)
+    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
+    })
+  })()
 
   const improvementPrompts = [
     "Start work earlier instead of spiraling in the morning",
@@ -85,7 +105,7 @@ export default function WinsForm({ session }: Props) {
   
     const { error } = await supabase.from('wins').upsert({
       user_id: session.user.id,
-      date: getLocalDate(),
+      date: selectedDate,
       wins: filteredWins,
       improvement: improvement.trim() || null
     }, {
@@ -97,6 +117,7 @@ export default function WinsForm({ session }: Props) {
     } else {
       setSaved(true)
       setIsExistingEntry(true)
+      onWinsSaved?.()
       // Reset "Saved" back to normal after 2 seconds
       setTimeout(() => setSaved(false), 2000)
     }
@@ -109,8 +130,17 @@ export default function WinsForm({ session }: Props) {
       <div className="p-6">
   
         <div className="mb-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-subtle mb-1">Today</p>
-          <p className="font-serif text-xl font-semibold text-action">{today}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-subtle mb-1">Entry date</p>
+          <div className="flex flex-col gap-2">
+            <p className="font-serif text-xl font-semibold text-action">{selectedDateLabel}</p>
+            <input
+              type="date"
+              value={selectedDate}
+              max={todayDate}
+              onChange={e => onSelectedDateChange(e.target.value)}
+              className="w-fit bg-input border border-subtle rounded-xl px-3 py-2 text-sm text-ink outline-none focus:border-primary transition-colors"
+            />
+          </div>
         </div>
   
         <p className="text-xs font-bold uppercase tracking-widest text-subtle mb-3">
@@ -168,7 +198,13 @@ export default function WinsForm({ session }: Props) {
           disabled={saving}
           className="bg-action text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
         >
-          {saving ? 'Saving...' : saved ? 'Saved ✓' : isExistingEntry ? 'Update today\'s wins ✦' : 'Save today\'s wins ✦'}
+          {saving
+            ? 'Saving...'
+            : saved
+              ? 'Saved ✓'
+              : isExistingEntry
+                ? 'Update entry ✦'
+                : 'Save entry ✦'}
         </button>
       </div>
     </div>

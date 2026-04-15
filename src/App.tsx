@@ -5,10 +5,13 @@ import Auth from './components/Auth'
 import WinsForm from './components/WinsForm'
 import PastEntries from './components/PastEntries'
 import Calendar from './components/Calendar'
+import { getLocalDate } from './lib/utils'
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [selectedDate, setSelectedDate] = useState(getLocalDate)
+  const [calendarRefresh, setCalendarRefresh] = useState(0)
 
   useEffect(() => {
     // Check for existing session on load — handles page refreshes
@@ -31,7 +34,7 @@ function App() {
   if (loading) return null
 
   if (!session) return <Auth />
-console.log(session.user.user_metadata.full_name)
+
   const handleSignOut = async () => {
     // Clears the session from Supabase and local storage —
     // onAuthStateChange fires automatically and sets session to null
@@ -58,14 +61,21 @@ console.log(session.user.user_metadata.full_name)
             {session.user.user_metadata.avatar_url ? (
               <img
                 src={session.user.user_metadata.avatar_url}
-                alt="Profile"
+                alt=""
                 className="w-8 h-8 rounded-full"
+                onError={e => {
+                  // If photo fails to load, hide the image and show the fallback
+                  e.currentTarget.style.display = 'none'
+                  e.currentTarget.nextElementSibling?.removeAttribute('style')
+                }}
               />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-action flex items-center justify-center text-white text-xs font-bold">
-                {session.user.user_metadata.full_name?.[0].toUpperCase() ?? session.user.email?.[0].toUpperCase()}
-              </div>
-            )}
+            ) : null}
+            <div
+              className="w-8 h-8 rounded-full bg-action flex items-center justify-center text-white text-xs font-bold"
+              style={{ display: session.user.user_metadata.avatar_url ? 'none' : 'flex' }}
+            >
+              {session.user.user_metadata.full_name?.[0].toUpperCase() ?? session.user.email?.[0].toUpperCase()}
+            </div>
             <button
               onClick={handleSignOut}
               className="text-xs font-semibold text-primary border border-subtle rounded-full px-3 py-1.5 hover:border-primary hover:text-action transition-colors"
@@ -80,12 +90,21 @@ console.log(session.user.user_metadata.full_name)
 
           {/* Left column */}
           <div className="w-full sm:flex-1 min-w-0">
-            <WinsForm session={session} />
+            <WinsForm
+              session={session}
+              selectedDate={selectedDate}
+              onSelectedDateChange={setSelectedDate}
+              onWinsSaved={() => setCalendarRefresh(n => n + 1)}
+            />
           </div>
 
           {/* Right column */}
           <div className="hidden sm:block w-full sm:w-[200px] sm:flex-shrink-0">
-            <Calendar />
+            <Calendar
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+              refreshTrigger={calendarRefresh}
+            />
           </div>
 
         </div>

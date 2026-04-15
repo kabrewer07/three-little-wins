@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getLocalDate, calculateStreak } from '../lib/utils'
 
-export default function Calendar() {
+interface Props {
+  selectedDate: string
+  onSelectDate: (date: string) => void
+  /** Bump after a save so logged-day dots refresh */
+  refreshTrigger?: number
+}
+
+export default function Calendar({ selectedDate, onSelectDate, refreshTrigger = 0 }: Props) {
   const [loggedDates, setLoggedDates] = useState<string[]>([])
   const streak = calculateStreak(loggedDates)
 
@@ -21,8 +28,8 @@ export default function Calendar() {
       setLoggedDates(data.map(entry => entry.date))
     }
   
-    fetchDates()
-  }, [])
+    void fetchDates()
+  }, [refreshTrigger])
 
   const now = new Date()
   const year = now.getFullYear()
@@ -70,20 +77,40 @@ export default function Calendar() {
             const day = i + 1
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
             const isToday = dateStr === todayDate
+            const isFuture = dateStr > todayDate
             const isLogged = loggedDates.includes(dateStr)
+            const isSelected = dateStr === selectedDate
+            const canSelect = !isFuture
+
+            const cellClass = `
+              aspect-square rounded-lg flex items-center justify-center text-xs font-semibold
+              ${isToday ? 'bg-action text-white' : ''}
+              ${isLogged && !isToday ? 'bg-input text-primary' : ''}
+              ${!isLogged && !isToday ? 'text-subtle' : ''}
+              ${isSelected && !isToday ? 'ring-2 ring-action ring-offset-1' : ''}
+              ${isSelected && isToday ? 'ring-2 ring-white ring-offset-2 ring-offset-action' : ''}
+              ${canSelect ? 'cursor-pointer hover:opacity-90' : 'opacity-40 cursor-default'}
+            `
+
+            if (!canSelect) {
+              return (
+                <div key={day} className={cellClass} aria-disabled>
+                  {day}
+                </div>
+              )
+            }
 
             return (
-              <div
+              <button
                 key={day}
-                className={`
-                  aspect-square rounded-lg flex items-center justify-center text-xs font-semibold
-                  ${isToday ? 'bg-action text-white' : ''}
-                  ${isLogged && !isToday ? 'bg-input text-primary' : ''}
-                  ${!isLogged && !isToday ? 'text-subtle' : ''}
-                `}
+                type="button"
+                onClick={() => onSelectDate(dateStr)}
+                className={cellClass}
+                aria-pressed={isSelected}
+                aria-label={`Edit entry for ${dateStr}`}
               >
                 {day}
-              </div>
+              </button>
             )
           })}
         </div>
