@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getLocalDate } from '../lib/utils'
 
@@ -20,9 +20,15 @@ const formatDate = (dateStr: string) => {
   })
 }
 
-export default function PastEntries() {
+interface Props {
+  /** Bumped after a save in WinsForm so this list refetches. */
+  refreshTrigger?: number
+}
+
+export default function PastEntries({ refreshTrigger = 0 }: Props) {
   const [entries, setEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
+  const initialLoad = useRef(true)
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -31,18 +37,21 @@ export default function PastEntries() {
         .select('*')
         .neq('date', getLocalDate())
         .order('date', { ascending: false })
-  
+
       if (error) {
         console.error(error)
       } else {
-        setEntries(data)
+        setEntries(data ?? [])
       }
-  
-      setLoading(false)
+
+      if (initialLoad.current) {
+        setLoading(false)
+        initialLoad.current = false
+      }
     }
-  
-    fetchEntries()
-  }, [])
+
+    void fetchEntries()
+  }, [refreshTrigger])
   
   if (loading) return <p className="text-sm text-subtle">Loading...</p>
 

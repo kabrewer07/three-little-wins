@@ -11,7 +11,7 @@ function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedDate, setSelectedDate] = useState(getLocalDate)
-  const [calendarRefresh, setCalendarRefresh] = useState(0)
+  const [winsListRefresh, setWinsListRefresh] = useState(0)
 
   useEffect(() => {
     // Check for existing session on load — handles page refreshes
@@ -94,7 +94,7 @@ function App() {
               session={session}
               selectedDate={selectedDate}
               onSelectedDateChange={setSelectedDate}
-              onWinsSaved={() => setCalendarRefresh(n => n + 1)}
+              onWinsSaved={() => setWinsListRefresh(n => n + 1)}
             />
           </div>
 
@@ -103,17 +103,17 @@ function App() {
             <Calendar
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
-              refreshTrigger={calendarRefresh}
+              refreshTrigger={winsListRefresh}
             />
           </div>
 
         </div>
 
-        {/* Past entrie */}
+        {/* Past entries */}
         <p className="text-xs font-bold uppercase tracking-widest text-subtle px-1 mb-3">
           Past entries
         </p>
-        <PastEntries />
+        <PastEntries refreshTrigger={winsListRefresh} />
 
       </div>
     </div>
